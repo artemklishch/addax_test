@@ -1,4 +1,9 @@
-import { DaysData, EventData } from "../contexts/calendar-context";
+import { getCurrentMonthEvents } from "../api";
+import {
+  DaysData,
+  EventData,
+  WorldHoliday,
+} from "../contexts/calendar-context";
 import { EVENT_BLOCK_HEIGHT, MONTH_NAMES } from "./constants";
 
 export interface DayObject {
@@ -8,6 +13,7 @@ export interface DayObject {
   year: number;
   isCurMonth: boolean;
   events: EventData[];
+  isHoliday?: WorldHoliday[];
 }
 type CalculateDays = (monthMark: number) => DaysData;
 export const calculateDays: CalculateDays = (monthMark) => {
@@ -46,6 +52,66 @@ export const calculateDays: CalculateDays = (monthMark) => {
     days: daysArray,
     curMonth: `${MONTH_NAMES[thisMonth]} ${thisYear}`,
   };
+};
+
+export const toLocalDateStrRev = (
+  year: number,
+  month: number,
+  date: number
+) => {
+  const transformedDate = new Date(year, month, date)
+    .toLocaleDateString()
+    .split(".")
+    .reverse()
+    .join("-");
+  return transformedDate;
+};
+export type CalculateFullData = (
+  monthMark: number,
+  setDaysData: (val: DaysData) => void,
+  worldHolidays: WorldHoliday[]
+) => Promise<any>;
+export const calculateFullData: CalculateFullData = async (
+  monthMark,
+  setDaysData,
+  worldHolidays
+) => {
+  const updatedDays = calculateDays(monthMark);
+  updatedDays.days = updatedDays.days.map((day) => {
+    const holidays = worldHolidays.filter(
+      (holiday) =>
+        holiday.date === toLocalDateStrRev(day.year, day.monthIndex, day.date)
+    );
+    if (holidays.length) {
+      day.isHoliday = holidays;
+    }
+    return day;
+  });
+  const firstCalendDay = updatedDays.days[0];
+  const start = toLocalDateStrRev(
+    firstCalendDay.year,
+    firstCalendDay.monthIndex,
+    firstCalendDay.date
+  );
+
+  const lastCalendDay = updatedDays.days[updatedDays.days.length - 1];
+  const last = toLocalDateStrRev(
+    lastCalendDay.year,
+    lastCalendDay.monthIndex,
+    lastCalendDay.date
+  );
+  const eventsData = (await getCurrentMonthEvents(start, last)) as EventData[];
+  if (eventsData) {
+    updatedDays.days = updatedDays.days.map((day) => {
+      const dayDate = toLocalDateStrRev(day.year, day.monthIndex, day.date);
+      const subArray = eventsData.filter((data) => data.date === dayDate);
+      day.events = subArray.sort((a, b) => a.orderNumber - b.orderNumber);
+      return day;
+    });
+    setDaysData(updatedDays);
+  } else {
+    setDaysData(updatedDays);
+  }
 };
 
 type CalculateDroppedEvents = (

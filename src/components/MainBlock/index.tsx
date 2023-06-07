@@ -1,14 +1,9 @@
 import { DragEvent, FC, useContext, useRef } from "react";
 import { CalendarContext } from "../../contexts/calendar-context";
 import { EVENT_BLOCK_HEIGHT } from "../../utils/constants";
-import {
-  MainBlockContainer,
-  DayBlockBox,
-  TopRow,
-  TopRowSpan,
-  EventBox,
-  EventBoxHeader,
-} from "./MainBlock.styles";
+import EventForm from "../EventForm";
+import DayBlock from "./DayBlock";
+import { MainBlockContainer } from "./MainBlock.styles";
 
 export interface DragParams {
   eventId: string;
@@ -56,43 +51,22 @@ const MainBlock: FC = () => {
   };
   return (
     <MainBlockContainer ref={daysMainBlockRef}>
+      {calendarCtx.isEventFormOpen && (
+        <EventForm onClose={calendarCtx.closeEventForm} />
+      )}
       {calendarCtx.daysData.days.map((dayData, index, array) => {
-        const isEvenMonth = dayData.monthIndex % 2 === 0;
-        const isFirstLastDate =
-          (array[index + 1] && array[index + 1].date === 1) ||
-          dayData.date === 1;
-        const topRowDateValue = isFirstLastDate
-          ? `${dayData.monthName} ${dayData.date}`
-          : dayData.date;
         return (
-          <DayBlockBox
+          <DayBlock
             key={index}
-            data-indexvalue={index}
-            data-evenmonth={isEvenMonth}
-            onDrop={dropHandler}
-            onDragOver={dragOver}
-            onDragEnter={dragEnterHandler}
-          >
-            <TopRow>
-              <TopRowSpan>{topRowDateValue}</TopRowSpan>
-              <TopRowSpan>
-                {dayData.events.length !== 0 &&
-                  `${dayData.events.length} cards`}
-              </TopRowSpan>
-            </TopRow>
-            {dayData.events.length !== 0 &&
-              dayData.events.map((data) => (
-                <EventBox
-                  key={data.eventId}
-                  id={data.eventId}
-                  data-indexvalue={index}
-                  draggable="true"
-                  onDragStart={dragStartHandler}
-                >
-                  <EventBoxHeader>{data.title}</EventBoxHeader>
-                </EventBox>
-              ))}
-          </DayBlockBox>
+            dayData={dayData}
+            allDaysData={array}
+            index={index}
+            dropHandler={dropHandler}
+            dragOver={dragOver}
+            dragEnterHandler={dragEnterHandler}
+            openEventForm={calendarCtx.openEventForm}
+            dragStartHandler={dragStartHandler}
+          />
         );
       })}
     </MainBlockContainer>

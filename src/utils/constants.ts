@@ -23,4 +23,3 @@ export const MONTH_NAMES: string[] = [
 ];
 
 export const EVENT_BLOCK_HEIGHT = 30;
-export const EVENT_BLOCK_MARGIN = 5;
