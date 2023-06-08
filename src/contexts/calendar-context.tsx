@@ -115,7 +115,7 @@ const CalendarContextProvider: FC<CalendarContextProviderProps> = ({
     }
   };
 
-  const dragDropUpdate = async (dragParams: DragParams) => {
+  const dragDropUpdate = (dragParams: DragParams) => {
     const dayEnd = daysData?.days[dragParams.dropDayIndex];
     if (
       dayEnd?.events.length === 3 &&
@@ -155,20 +155,17 @@ const CalendarContextProvider: FC<CalendarContextProviderProps> = ({
       }
       return day;
     });
-    let isSuccess;
+    setDaysData((values) => ({
+      ...values,
+      days: updatedDaysData,
+    }));
     if (updatedDragedEvents[0]?.date === updatedDropedEvents[0].date) {
-      isSuccess = await updateDragDropInOneDay(updatedDropedEvents);
+      updateDragDropInOneDay(updatedDropedEvents);
     } else {
-      isSuccess = await updateDragDropDiffDays({
+      updateDragDropDiffDays({
         draggedDay: updatedDragedEvents,
         droppedDay: updatedDropedEvents,
       });
-    }
-    if (isSuccess) {
-      setDaysData((values) => ({
-        ...values,
-        days: updatedDaysData,
-      }));
     }
   };
 
