@@ -11,7 +11,7 @@ export const DayBlockBox = styled.div`
     background-color: #ebf5f7;
   }
 `;
-export const TopRow = styled.p`
+export const TopRow = styled.div`
   margin: 5px 0;
   display: flex;
   justify-content: space-between;
@@ -31,6 +31,9 @@ export const EventBox = styled.div`
 export const EventBoxHeader = styled.h5`
   margin: 0;
   font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 export const CommonDayData = styled.div`
   flex-grow: 1;
